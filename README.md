@@ -1,4 +1,4 @@
-# TICAL
+# TIACL
 
 Build (Windows):
 ```command line
