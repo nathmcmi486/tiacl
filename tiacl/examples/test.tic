@@ -1,0 +1,5 @@
+decfun valid_function() {
+
+}
+
+decfun invalid-function

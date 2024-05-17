@@ -48,12 +48,20 @@ namespace tiacl
                 }
             } else
             {
+                Console.WriteLine($"{file} is an invalid file");
+                Environment.Exit(-1);
                 return false;
             }
         }
 
         public void runCMdArgs(String[] args)
         {
+            if (args.Count() == 0)
+            {
+                Console.WriteLine("No arguments given");
+                Environment.Exit(-1);
+            }
+
             switch (args[0])
             {
                 case HELP1: case HELP2:
