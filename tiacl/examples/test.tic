@@ -1,5 +1,7 @@
 decfun valid_function() {
-
+	1 - 3
 }
 
-decfun invalid-function
+decfun another_valid_function() {
+djerkjreijwijwrijpwe
+}

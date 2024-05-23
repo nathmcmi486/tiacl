@@ -13,6 +13,7 @@ namespace tiacl
             InvalidFunctionName,
             InvalidFunctionDeclaration,
             FunctionMissingStart,
+            WarnFunctionEmpty,
             None,
         }
 

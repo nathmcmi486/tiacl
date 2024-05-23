@@ -14,6 +14,7 @@ namespace tiacl
         List<Variable> globalVariables = new List<Variable>();
 
         public static String[] symbols = { "!", "*", "-", "=", "+", "/", "^", "\"", "'", "{", "}", "&", "decfun", "decvar", "~" };
+        public static String[] mathSymbols = { "+", "-", "*", "/" };
         public static String[] invalidSymbols = { "@", "#", "$", "%", "`", ".", "?", "\\", };
 
         public Syntax(String file)
@@ -28,16 +29,62 @@ namespace tiacl
 
             String currentLineContent = fileReader.ReadLine();
             int lineNumber = 0;
+            List<String> temporaryLines = new List<String>();
+            bool readingFunction = false;
+
+            List<Function> functions = new List<Function>();
+            Function temporaryFunction = new Function();
 
             while (currentLineContent != null)
             {
-                Function function = new Function();
+                if (readingFunction == true)
+                {
+                    if (currentLineContent.Contains("}"))
+                    {
+                        readingFunction = false;
 
-                Console.WriteLine($"{lineNumber}: {currentLineContent}");
-                Errors.SyntaxErrors ret = function.isLineFunctionDec(currentLineContent);
-                Console.WriteLine($"{ret}");
+                        lineNumber++;
+                        currentLineContent = fileReader.ReadLine();
+                        Errors.SyntaxErrors ret = temporaryFunction.buildFunctionFromContents();
+
+                        if (((int)ret) < 3)
+                        {
+                            Console.WriteLine($"Error: {ret}");
+                        }
+
+                        functions.Add(temporaryFunction);
+                        temporaryFunction = new Function();
+                        continue;
+                    }
+
+                    if (currentLineContent != null || currentLineContent != "")
+                    {
+                        temporaryFunction.contents.Add(currentLineContent);
+                    }
+                    lineNumber++;
+                    currentLineContent = fileReader.ReadLine();
+                    continue;
+                }
+
+                Errors.SyntaxErrors fundecRet = temporaryFunction.isLineFunctionDec(currentLineContent);
+
+                if (fundecRet == Errors.SyntaxErrors.None)
+                {
+                    temporaryLines.Add(currentLineContent);
+                    readingFunction = true;
+                }
+                else
+                {
+                    Console.WriteLine($"Error on line: {lineNumber}: {fundecRet} - {currentLineContent}");
+                }
 
                 currentLineContent = fileReader.ReadLine();
+                if (currentLineContent == null)
+                {
+                    currentLineContent = fileReader.ReadLine();
+                    lineNumber++;
+                    continue;
+                }
                 lineNumber++;
             }
         }
