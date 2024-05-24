@@ -78,11 +78,35 @@ namespace tiacl
                 type = t;
                 value = v;
             }
+
+            public Value(String content)
+            {
+                int testInt = 0;
+                try
+                {
+                    testInt = Convert.ToInt32(content);
+                } catch (FormatException fe)
+                {
+                    type = BuiltinType.String;
+                    value = content;
+                    return;
+                }
+
+                type = BuiltinType.Int;
+                value = content;
+            }
         }
 
-        public enum Variable
+        public class Variable
         {
+            public Value value;
+            public String name;
 
+            public Variable(Value value_, String name_)
+            {
+                value = value_;
+                name = name_;
+            }
         }
 
         public enum BuiltinType
@@ -91,19 +115,55 @@ namespace tiacl
             String,
         }
 
-        public enum FunctionCall
+        // Function calling
+        public class FunctionCall
         {
+            public bool builtin;
+            public String name;
+            public List<Value> args;
 
+            public FunctionCall(bool builtin_, String name_, List<Value> arguments_)
+            {
+                builtin = builtin_;
+                name = name_;
+                args = arguments_;
+            }
         }
 
-        public object readContents(List<String> contents)
+        public object readContent(String content)
         {
+            content = content.Trim();
             for (int i = 0; i < Syntax.mathSymbols.Count(); i++)
             {
-                if (contents[0].Contains(Syntax.mathSymbols[i]))
+                if (content.Contains(Syntax.mathSymbols[i]))
                 {
-                    return new MathInfo(contents[0]);
+                    return new MathInfo(content);
                 }
+            }
+
+            // Call built-in function
+            if (content.StartsWith("!") && content.EndsWith("!"))
+            {
+                String[] split = content.Split('(');
+                String fname = split[0].Split('!')[1];
+                List<Value> args = new List<Value>();
+                String argsString = split[1].Split(')')[0];
+
+                if (argsString.Contains(", ") == false)
+                {
+                    args.Add(new Value(argsString));
+                    return new FunctionCall(true, fname, args);
+                }
+
+                String[] argsStringArray = argsString.Split(", ");
+                argsStringArray.Append("");
+
+                for (int i = 0; i <= argsStringArray.Length; i++)
+                {
+                    args.Add(new Value(argsStringArray[i]));
+                }
+
+                return new FunctionCall(true, fname, args);
             }
 
             return null;

@@ -10,6 +10,9 @@ namespace tiacl
     {
         public String functionName = "";
         public List<String> contents = new List<String>();
+        public List<Contents.Variable> arguments = new List<Contents.Variable>();
+        // Everything the function does in order
+        public List<object> functionContents = new List<object>();
 
         public Function()
         {
@@ -74,18 +77,30 @@ namespace tiacl
                 return Errors.SyntaxErrors.WarnFunctionEmpty;
             }
 
-            Contents c = new Contents();
-            object ret = c.readContents(contents);
+            contents.Add("");
 
-            if (ret is Contents.MathInfo)
+            Contents c = new Contents();
+
+            foreach (String line in contents)
             {
-                Contents.MathInfo mi = ret as Contents.MathInfo;
-                Console.WriteLine($"output: {mi.output.value}");
-                mi.runOpperation();
-                Console.WriteLine($"output: {mi.output.value}");
-            } else if (ret is Contents.BuiltinType)
-            {
-                Console.WriteLine("defining stuff");
+                object ret = c.readContent(line);
+
+                if (ret is Contents.MathInfo)
+                {
+                    Contents.MathInfo mi = ret as Contents.MathInfo;
+                    Console.WriteLine($"output: {mi.output.value}");
+                    mi.runOpperation();
+                    Console.WriteLine($"output: {mi.output.value}");
+                    functionContents.Add(ret);
+                }
+                else if (ret is Contents.FunctionCall)
+                {
+                    Contents.FunctionCall fc = ret as Contents.FunctionCall;
+                    Console.WriteLine($"calling function name: {fc.name}");
+                    BuiltinFunctions builtinFunctions = new BuiltinFunctions();
+                    builtinFunctions.execute(fc.name, fc.args);
+                    functionContents.Add(fc);
+                }
             }
 
             return Errors.SyntaxErrors.None;

@@ -1,5 +1,7 @@
 decfun valid_function() {
 	1 - 3
+	2 + 1
+	!display("this is a print statement")!
 }
 
 decfun another_valid_function() {
