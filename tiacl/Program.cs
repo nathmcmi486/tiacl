@@ -21,16 +21,27 @@
             Cmd cmd = new Cmd();
             cmd.runCMdArgs(args);
 
-            if (cmd.interpreting == true)
-            {
-                Console.WriteLine($"Interpreting {cmd.fileName}...");
-            } else if (cmd.compiling == true)
-            {
-                Console.WriteLine($"Compiling {cmd.fileName}...");
-            }
 
             Syntax syntax = new Syntax(cmd.fileName);
             syntax.checkSyntax();
+
+            if (cmd.interpreting == true)
+            {
+                Console.WriteLine($"Interpreting {cmd.fileName}...");
+                
+                List<object> code = new List<object>();
+                for (int i = 0; i < syntax.functions.Count; i++)
+                {
+                    code.Add(syntax.functions[i]);
+                }
+
+                Interpreter interpreter = new Interpreter(code);
+                interpreter.interpret();
+            }
+            else if (cmd.compiling == true)
+            {
+                Console.WriteLine($"Compiling {cmd.fileName}...");
+            }
         }
     }
 }

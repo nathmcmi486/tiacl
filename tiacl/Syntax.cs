@@ -10,7 +10,7 @@ namespace tiacl
     {
         String fileName;
 
-        List<Function> functions = new List<Function>();
+        public List<Function> functions = new List<Function>();
         List<Variable> globalVariables = new List<Variable>();
 
         public static String[] symbols = { "!", "*", "-", "=", "+", "/", "^", "\"", "'", "{", "}", "&", "decfun", "decvar", "~" };
@@ -32,11 +32,20 @@ namespace tiacl
             List<String> temporaryLines = new List<String>();
             bool readingFunction = false;
 
-            List<Function> functions = new List<Function>();
+            //List<Function> functions = new List<Function>();
             Function temporaryFunction = new Function();
+            Variable temporaryVariable = new Variable();
 
             while (currentLineContent != null)
             {
+                if (currentLineContent.StartsWith("\t//") || currentLineContent.StartsWith("//"))
+                {
+                    Console.WriteLine("comment");
+                    lineNumber++;
+                    currentLineContent = fileReader.ReadLine();
+                    continue;
+                }
+
                 if (readingFunction == true)
                 {
                     if (currentLineContent.Contains("}"))
@@ -53,6 +62,7 @@ namespace tiacl
                         }
 
                         functions.Add(temporaryFunction);
+                        //Console.WriteLine($"finsihed going over {temporaryFunction.functionName}, contents len: {temporaryFunction.functionContents.Count()}, current line: {lineNumber}");
                         temporaryFunction = new Function();
                         continue;
                     }
@@ -67,11 +77,16 @@ namespace tiacl
                 }
 
                 Errors.SyntaxErrors fundecRet = temporaryFunction.isLineFunctionDec(currentLineContent);
+                Errors.SyntaxErrors vardecRet = temporaryVariable.isLineVariableDec(currentLineContent);
 
                 if (fundecRet == Errors.SyntaxErrors.None)
                 {
                     temporaryLines.Add(currentLineContent);
                     readingFunction = true;
+                } else if (vardecRet == Errors.SyntaxErrors.None)
+                {
+                    Console.WriteLine("yep");
+                    //globalVariables.Add(temporaryVariable.buildFromContents());
                 }
                 else
                 {

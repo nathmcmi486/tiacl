@@ -11,9 +11,13 @@ namespace tiacl
         public enum SyntaxErrors
         {
             InvalidFunctionName,
+            InvalidVariableName,
             InvalidFunctionDeclaration,
+            InvalidVariableDeclaration,
             FunctionMissingStart,
+            ExpectedInteger,
             WarnFunctionEmpty,
+            VariableOrValueNotFound,
             None,
         }
 

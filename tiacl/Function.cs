@@ -84,26 +84,54 @@ namespace tiacl
             foreach (String line in contents)
             {
                 object ret = c.readContent(line);
+                functionContents.Add(ret);
 
-                if (ret is Contents.MathInfo)
+                if (ret is Variable)
                 {
-                    Contents.MathInfo mi = ret as Contents.MathInfo;
-                    Console.WriteLine($"output: {mi.output.value}");
-                    mi.runOpperation();
-                    Console.WriteLine($"output: {mi.output.value}");
-                    functionContents.Add(ret);
+                    Console.WriteLine("whilst bulding function a variable was found");
                 }
-                else if (ret is Contents.FunctionCall)
-                {
-                    Contents.FunctionCall fc = ret as Contents.FunctionCall;
-                    Console.WriteLine($"calling function name: {fc.name}");
-                    BuiltinFunctions builtinFunctions = new BuiltinFunctions();
-                    builtinFunctions.execute(fc.name, fc.args);
-                    functionContents.Add(fc);
-                }
+                c.context = functionContents;
             }
 
             return Errors.SyntaxErrors.None;
+        }
+
+        public void execute(Interpreter intr)
+        {
+            for (int i = 0; i < functionContents.Count; i++)
+            {
+                if (functionContents[i] is Contents.MathInfo)
+                {
+                    Contents.MathInfo mi = functionContents[i] as Contents.MathInfo;
+                    mi.runOpperation();
+                }
+                else if (functionContents[i] is Contents.FunctionCall)
+                {
+                    Contents.FunctionCall fc = functionContents[i] as Contents.FunctionCall;
+
+                    if (fc.builtin == true)
+                    {
+                        BuiltinFunctions builtinFunctions = new BuiltinFunctions();
+                        Console.WriteLine($"fc {fc.args[0].value}");
+                        builtinFunctions.execute(fc.name, fc.args);
+                    } else
+                    {
+                        for (int j = 0; j < intr.code.Count; j++)
+                        {
+                            if (intr.code[j] is Function)
+                            {
+                                Function fn = (Function)intr.code[j];
+                                if (fn.functionName == fc.name)
+                                {
+                                    fn.execute(intr);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    //functionContents.Add(fc);
+                }
+            }
         }
     }
 }

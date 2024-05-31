@@ -73,6 +73,11 @@ namespace tiacl
             public BuiltinType type;
             public String value;
 
+            public Value()
+            {
+
+            }
+
             public Value(BuiltinType t, String v)
             {
                 type = t;
@@ -101,11 +106,37 @@ namespace tiacl
         {
             public Value value;
             public String name;
+            public Errors.SyntaxErrors ret = Errors.SyntaxErrors.None;
 
             public Variable(Value value_, String name_)
             {
                 value = value_;
                 name = name_;
+            }
+
+            public Variable(String line)
+            {
+                String[] split = line.Split(' ');
+
+                name = split[1];
+
+                Value val = new Value();
+                if (split[3].Contains("\""))
+                {
+                    val.type = BuiltinType.String;
+                    for (int i = 3; i < split.Length; i++)
+                    {
+                        val.value = $"{val.value} {split[i]}";
+                    }
+                    val.value = val.value.Replace("\";", "\"");
+                    value = val;
+                } else
+                {
+                    val.type = BuiltinType.Int;
+                    val.value = split[3];
+                }
+
+                name = split[1];
             }
         }
 
@@ -130,6 +161,59 @@ namespace tiacl
             }
         }
 
+        public List<object> context = new List<object>();
+
+        List<Value> functionArguments(String argsString)
+        {
+            List<Value> ret = new List<Value>();
+
+            if (argsString.Contains(", ") == false)
+            {
+                Value testValue = new Value(argsString);
+                if (testValue.type == BuiltinType.String && argsString.Contains("\"") == false)
+                {
+                    foreach (object c in context)
+                    {
+                        if (c is Variable)
+                        {
+                            Variable v = (Variable)c;
+                            if (v.name == testValue.value)
+                            {
+                                ret.Add(v.value);
+                                return ret;
+                            }
+                        } else
+                        {
+                            Console.WriteLine($"Error: {Errors.SyntaxErrors.VariableOrValueNotFound}");
+                        }
+                    }
+                    Console.WriteLine($"here, length: {ret.Count}");
+                } else
+                {
+                    ret.Add(testValue);
+                    return ret;
+                }
+
+            }
+
+            Console.WriteLine($"here: {argsString}");
+            String[] argsStringArray = argsString.Split(", ");
+            argsStringArray.Append("");
+
+            if (argsStringArray.Length == 0)
+            {
+                return ret;
+            }
+
+            Console.WriteLine($"{argsStringArray.Length}");
+            for (int i = 0; i == argsStringArray.Length; i++)
+            {
+                ret.Add(new Value(argsStringArray[i]));
+            }
+
+            return ret;
+        }
+
         public object readContent(String content)
         {
             content = content.Trim();
@@ -141,18 +225,36 @@ namespace tiacl
                 }
             }
 
+            // Variable
+            if (content.StartsWith("decvar"))
+            {
+                Variable v = new Variable(content);
+                return new Variable(content);
+            }
+
             // Call built-in function
             if (content.StartsWith("!") && content.EndsWith("!"))
             {
                 String[] split = content.Split('(');
                 String fname = split[0].Split('!')[1];
+                String argsString = split[1].Split(')')[0];
+                List<Value> args = functionArguments(argsString);
+                
+                return new FunctionCall(true, fname, args);
+            }
+
+            // Call regular function
+            if (content.EndsWith(");"))
+            {
+                String[] split = content.Split('(');
+                String fname = split[0];
                 List<Value> args = new List<Value>();
                 String argsString = split[1].Split(')')[0];
 
                 if (argsString.Contains(", ") == false)
                 {
                     args.Add(new Value(argsString));
-                    return new FunctionCall(true, fname, args);
+                    return new FunctionCall(false, fname, args);
                 }
 
                 String[] argsStringArray = argsString.Split(", ");
@@ -163,7 +265,7 @@ namespace tiacl
                     args.Add(new Value(argsStringArray[i]));
                 }
 
-                return new FunctionCall(true, fname, args);
+                return new FunctionCall(false, fname, args);
             }
 
             return null;

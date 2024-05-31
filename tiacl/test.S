@@ -1,4 +1,0 @@
-﻿global start
-
-start:
-	ret
