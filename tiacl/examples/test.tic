@@ -1,12 +1,14 @@
 decvar global_variable = "r gohwrhweoeuhfwewhoewohfewuhefw ";
-decvar global_int = 4848383;	
+decvar global_int = 4848383;
 
-decfun valid_function() {
-
+decfun valid_function(decvar thing :int) {
+	!display("here")!
+	!display(thing)!
 }
 
 decfun main() {
 	decvar test_str = "test!!! r";
 	decvar test_int = 3;
-	!display(test_int)!
+	valid_function(test_int);
+	!display("called valid function")!
 }

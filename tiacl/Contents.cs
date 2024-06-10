@@ -121,8 +121,25 @@ namespace tiacl
                 name = split[1];
 
                 Value val = new Value();
+
+                if (split.Length == 3)
+                {
+                    if (split[2] == ":string" || split[2] == ":string,")
+                    {
+                        val.type = BuiltinType.String;
+                        val.value = "";
+                    } else if (split[2] == ":int" || split[2] == ":int,")
+                    {
+                        val.type = BuiltinType.Int;
+                        val.value = "0";
+                    }
+
+                    return;
+                }
+
                 if (split[3].Contains("\""))
                 {
+                    Console.WriteLine("declared a string");
                     val.type = BuiltinType.String;
                     for (int i = 3; i < split.Length; i++)
                     {
@@ -132,8 +149,10 @@ namespace tiacl
                     value = val;
                 } else
                 {
+                    split[3] = split[3].Replace(";", "");
                     val.type = BuiltinType.Int;
                     val.value = split[3];
+                    value = val;
                 }
 
                 name = split[1];
@@ -176,9 +195,11 @@ namespace tiacl
                     {
                         if (c is Variable)
                         {
+                            Console.WriteLine("variable");
                             Variable v = (Variable)c;
                             if (v.name == testValue.value)
                             {
+                                Console.WriteLine($"adding {v.name}, {v.value.value} {v.value.type}");
                                 ret.Add(v.value);
                                 return ret;
                             }
@@ -190,6 +211,7 @@ namespace tiacl
                     Console.WriteLine($"here, length: {ret.Count}");
                 } else
                 {
+                    Console.WriteLine($"adding value");
                     ret.Add(testValue);
                     return ret;
                 }
@@ -246,6 +268,7 @@ namespace tiacl
             // Call regular function
             if (content.EndsWith(");"))
             {
+                Console.WriteLine("a regular function exists");
                 String[] split = content.Split('(');
                 String fname = split[0];
                 List<Value> args = new List<Value>();
@@ -253,7 +276,20 @@ namespace tiacl
 
                 if (argsString.Contains(", ") == false)
                 {
+                    Value tmpVal = new Value(argsString);
+                    if (tmpVal.type == BuiltinType.String && tmpVal.value.Contains("\"") == false)
+                    {
+                        for (int i = 0; i < context.Count; i++)
+                        {
+                            if (context[i] is Variable)
+                            {
+                                Variable v = (Variable)context[i];
+                                Console.WriteLine($"{v.name}");
+                            }
+                        }
+                    }
                     args.Add(new Value(argsString));
+                    Console.WriteLine($"calling with {args[0].value}");
                     return new FunctionCall(false, fname, args);
                 }
 
@@ -263,7 +299,9 @@ namespace tiacl
                 for (int i = 0; i <= argsStringArray.Length; i++)
                 {
                     args.Add(new Value(argsStringArray[i]));
+                    Console.WriteLine($"calling with: {args.Last().value}");
                 }
+                Console.WriteLine($"fc: {args[0].value}");
 
                 return new FunctionCall(false, fname, args);
             }

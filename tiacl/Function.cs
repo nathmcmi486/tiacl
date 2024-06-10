@@ -40,9 +40,12 @@ namespace tiacl
             }
 
             // Is it's name a valid function name?
+            String[] splitName = functionDeclaration[1].Split('(');
+            functionName = splitName[0];
+
             for (int i = 0; i < Syntax.symbols.Length; i++)
             {
-                if (functionDeclaration[1].Contains(Syntax.symbols[i]))
+                if (functionName.Contains(Syntax.symbols[i]))
                 {
                     Console.WriteLine($"Cannot have \"{Syntax.symbols[i]}\" in function name");
                     return Errors.SyntaxErrors.InvalidFunctionName;
@@ -50,15 +53,32 @@ namespace tiacl
             }
             for (int i = 0; i < Syntax.invalidSymbols.Length; i++)
             {
-                if (functionDeclaration[1].Contains(Syntax.symbols[i]))
+                if (functionName.Contains(Syntax.symbols[i]))
                 {
                     Console.WriteLine($"Cannot have \"{Syntax.symbols[i]}\" in function name");
                     return Errors.SyntaxErrors.InvalidFunctionName;
                 }
             }
 
-            functionName = functionDeclaration[1].Split('(')[0];
+            if (splitName[1] != ")")
+            {
+                functionDeclaration[1] = functionDeclaration[1].Split('(')[1];
+                Console.WriteLine($"{functionDeclaration.Length}");
+                functionDeclaration[functionDeclaration.Length - 2] = functionDeclaration[functionDeclaration.Length - 2].Replace(")", "");
+                Console.WriteLine($"{functionDeclaration[1]}");
 
+                for (int i = 3; i <= functionDeclaration.Length; i += 3)
+                {
+                    if (functionDeclaration[i].EndsWith(","))
+                    {
+                        functionDeclaration[i] = functionDeclaration[i].Replace(",", "");
+                    }
+
+                    Console.WriteLine($"{functionDeclaration[i - 2]} {functionDeclaration[i - 1]} {functionDeclaration[i]}");
+                    Contents.Variable tmpVar = new Contents.Variable($"{functionDeclaration[i - 2]} {functionDeclaration[i - 1]} {functionDeclaration[i]}");
+                    arguments.Add(tmpVar);
+                }
+            }
             // Does it have a starting bracket?
             if (functionDeclaration[functionDeclaration.Length - 1] == "{")
             {
@@ -80,6 +100,7 @@ namespace tiacl
             contents.Add("");
 
             Contents c = new Contents();
+            c.context = functionContents;
 
             foreach (String line in contents)
             {
@@ -88,7 +109,7 @@ namespace tiacl
 
                 if (ret is Variable)
                 {
-                    Console.WriteLine("whilst bulding function a variable was found");
+                    Console.WriteLine("whilst building function a variable was found");
                 }
                 c.context = functionContents;
             }
@@ -112,7 +133,7 @@ namespace tiacl
                     if (fc.builtin == true)
                     {
                         BuiltinFunctions builtinFunctions = new BuiltinFunctions();
-                        Console.WriteLine($"fc {fc.args[0].value}");
+                        Console.WriteLine($"call {fc.args.Count}");
                         builtinFunctions.execute(fc.name, fc.args);
                     } else
                     {

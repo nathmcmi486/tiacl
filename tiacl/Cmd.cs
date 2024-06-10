@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace tiacl
 {
@@ -54,6 +55,54 @@ namespace tiacl
             }
         }
 
+        void checkCompiler()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Console.WriteLine("Running on Windows");
+                bool gas = File.Exists("/ProgramFiles/as.exe");
+                bool ld = File.Exists("/ProgramFiles/ld.exe");
+
+                if (gas == false)
+                {
+                    Console.WriteLine("Missing GNU Assembler (GAS \"as\") command, required for compiling");
+                }
+
+                if (ld == false)
+                {
+                    Console.WriteLine("Missing GNU Linker (\"ld\") command, required for compiling");
+                }
+
+                if (ld == false || gas == false)
+                {
+                    Console.WriteLine("Cannot compile");
+                    Environment.Exit(-1);
+                }
+            } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Console.WriteLine("Running on a POSIX OS");
+                bool gas = File.Exists("/bin/as");
+                bool ld = File.Exists("/bin/ld");
+
+                if (gas == false)
+                {
+                    Console.WriteLine("Missing GNU Assembler (GAS \"as\") command, required for compiling");
+                }
+
+                if (ld == false)
+                {
+                    Console.WriteLine("Missing GNU Linker (\"ld\") command, required for compiling");
+                }
+
+                if (ld == false || gas == false)
+                {
+                    Console.WriteLine("Cannot compile");
+                    Environment.Exit(-1);
+                }
+            }
+
+        }
+
         public void runCMdArgs(String[] args)
         {
             if (args.Count() == 0)
@@ -73,6 +122,7 @@ namespace tiacl
                     break;
                 case COMPILE:
                     checkFile(args[1]);
+                    checkCompiler();
                     compiling = true;
                     break;
                 default:
