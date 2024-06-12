@@ -139,7 +139,6 @@ namespace tiacl
 
                 if (split[3].Contains("\""))
                 {
-                    Console.WriteLine("declared a string");
                     val.type = BuiltinType.String;
                     for (int i = 3; i < split.Length; i++)
                     {
@@ -177,6 +176,10 @@ namespace tiacl
                 builtin = builtin_;
                 name = name_;
                 args = arguments_;
+                if (args.Count() != 0)
+                {
+                    Console.WriteLine($"Argument value: {args[0].value}");
+                }
             }
         }
 
@@ -195,30 +198,26 @@ namespace tiacl
                     {
                         if (c is Variable)
                         {
-                            Console.WriteLine("variable");
                             Variable v = (Variable)c;
                             if (v.name == testValue.value)
                             {
-                                Console.WriteLine($"adding {v.name}, {v.value.value} {v.value.type}");
+                                Console.WriteLine($"{v.name} = {v.value.value}");
                                 ret.Add(v.value);
                                 return ret;
                             }
                         } else
                         {
-                            Console.WriteLine($"Error: {Errors.SyntaxErrors.VariableOrValueNotFound}");
+                            Console.WriteLine($"Error: {Errors.SyntaxErrors.VariableOrValueNotFound} {testValue.value}");
                         }
                     }
-                    Console.WriteLine($"here, length: {ret.Count}");
                 } else
                 {
-                    Console.WriteLine($"adding value");
                     ret.Add(testValue);
                     return ret;
                 }
 
             }
 
-            Console.WriteLine($"here: {argsString}");
             String[] argsStringArray = argsString.Split(", ");
             argsStringArray.Append("");
 
@@ -227,7 +226,6 @@ namespace tiacl
                 return ret;
             }
 
-            Console.WriteLine($"{argsStringArray.Length}");
             for (int i = 0; i == argsStringArray.Length; i++)
             {
                 ret.Add(new Value(argsStringArray[i]));
@@ -261,6 +259,11 @@ namespace tiacl
                 String fname = split[0].Split('!')[1];
                 String argsString = split[1].Split(')')[0];
                 List<Value> args = functionArguments(argsString);
+
+                foreach (Value v in args)
+                {   
+                    Console.WriteLine($"builtin function call value: {v.value}");
+                }
                 
                 return new FunctionCall(true, fname, args);
             }
@@ -268,13 +271,12 @@ namespace tiacl
             // Call regular function
             if (content.EndsWith(");"))
             {
-                Console.WriteLine("a regular function exists");
                 String[] split = content.Split('(');
                 String fname = split[0];
                 List<Value> args = new List<Value>();
                 String argsString = split[1].Split(')')[0];
 
-                if (argsString.Contains(", ") == false)
+                /*if (argsString.Contains(", ") == false)
                 {
                     Value tmpVal = new Value(argsString);
                     if (tmpVal.type == BuiltinType.String && tmpVal.value.Contains("\"") == false)
@@ -284,24 +286,35 @@ namespace tiacl
                             if (context[i] is Variable)
                             {
                                 Variable v = (Variable)context[i];
-                                Console.WriteLine($"{v.name}");
+                                Console.WriteLine("Adding variable argument");
+                                Console.WriteLine($"{v.name} {v.value.value}");
+                                args.Add(v.value);
+                                Console.Write($"Variable value: {args[0].value}");
+                                break;
                             }
                         }
                     }
-                    args.Add(new Value(argsString));
-                    Console.WriteLine($"calling with {args[0].value}");
+                    else
+                    {
+                        Console.WriteLine("Making regular function");
+                        Console.WriteLine($"args: {argsString}");
+                        args.Add(new Value(argsString));
+                    }
                     return new FunctionCall(false, fname, args);
                 }
 
                 String[] argsStringArray = argsString.Split(", ");
-                argsStringArray.Append("");
+                argsStringArray.Append("");*/
+                args = functionArguments(argsString);
+                if (args.Count() != 0)
+                {
+                    Console.WriteLine($"{args[0].value}");
+                }
 
-                for (int i = 0; i <= argsStringArray.Length; i++)
+                /*for (int i = 0; i <= argsStringArray.Length; i++)
                 {
                     args.Add(new Value(argsStringArray[i]));
-                    Console.WriteLine($"calling with: {args.Last().value}");
-                }
-                Console.WriteLine($"fc: {args[0].value}");
+                }*/
 
                 return new FunctionCall(false, fname, args);
             }

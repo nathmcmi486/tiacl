@@ -10,5 +10,6 @@ decfun main() {
 	decvar test_str = "test!!! r";
 	decvar test_int = 3;
 	valid_function(test_int);
+	//!display(test_int)!
 	!display("called valid function")!
 }

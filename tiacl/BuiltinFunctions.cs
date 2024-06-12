@@ -23,8 +23,8 @@ namespace tiacl
             switch (name)
             {
                 case "display":
-                    Console.WriteLine($"argument {arguments[0].type}");
-
+                    //Console.WriteLine($"argument {arguments[0].type}");
+                    Console.WriteLine("here");
                     display(arguments[0].value);
                     break;
                 default:

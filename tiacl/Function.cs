@@ -97,9 +97,19 @@ namespace tiacl
                 return Errors.SyntaxErrors.WarnFunctionEmpty;
             }
 
+            
+
             contents.Add("");
 
             Contents c = new Contents();
+            if (arguments.Count != 0)
+            {
+                for (int i = 0; i < arguments.Count; i++)
+                {
+                    Console.WriteLine("Adding arguments as variables");
+                    c.context.Add(arguments[i]);
+                }
+            }
             c.context = functionContents;
 
             foreach (String line in contents)
@@ -133,7 +143,8 @@ namespace tiacl
                     if (fc.builtin == true)
                     {
                         BuiltinFunctions builtinFunctions = new BuiltinFunctions();
-                        Console.WriteLine($"call {fc.args.Count}");
+                        Console.WriteLine($"builtin fc args: {fc.args.Count()}");
+                        Console.WriteLine("calling builtin function");
                         builtinFunctions.execute(fc.name, fc.args);
                     } else
                     {
@@ -144,6 +155,21 @@ namespace tiacl
                                 Function fn = (Function)intr.code[j];
                                 if (fn.functionName == fc.name)
                                 {
+                                    Console.WriteLine($"calling {fn.functionName} {fn.arguments.Count()} {fc.args.Count()}");
+                                    if (fc.args.Count() != 0)
+                                    {
+                                        Console.WriteLine($"{fc.args[0].value}");
+                                    }
+
+                                    for (int k = 0; k < fn.arguments.Count; k++)
+                                    {
+                                        if (k >= fc.args.Count)
+                                        {
+                                            Console.WriteLine("More arguments given than needed");
+                                        }
+
+                                        fn.arguments[k].value = fc.args[k];
+                                    }
                                     fn.execute(intr);
                                     continue;
                                 }
