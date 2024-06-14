@@ -114,6 +114,11 @@ namespace tiacl
                 name = name_;
             }
 
+            public Variable()
+            {
+
+            }
+
             public Variable(String line)
             {
                 String[] split = line.Split(' ');
@@ -169,25 +174,23 @@ namespace tiacl
         {
             public bool builtin;
             public String name;
-            public List<Value> args;
+            public List<Variable> args;
 
-            public FunctionCall(bool builtin_, String name_, List<Value> arguments_)
+            public FunctionCall(bool builtin_, String name_, List<Variable> arguments_)
             {
                 builtin = builtin_;
                 name = name_;
                 args = arguments_;
-                if (args.Count() != 0)
-                {
-                    Console.WriteLine($"Argument value: {args[0].value}");
-                }
             }
         }
 
         public List<object> context = new List<object>();
+        public List<Variable> arguments = new List<Variable>();
 
-        List<Value> functionArguments(String argsString)
+        List<Variable> functionArguments(String argsString)
         {
-            List<Value> ret = new List<Value>();
+            List<Variable> ret = new List<Variable>();
+            Random r = new Random();
 
             if (argsString.Contains(", ") == false)
             {
@@ -201,18 +204,29 @@ namespace tiacl
                             Variable v = (Variable)c;
                             if (v.name == testValue.value)
                             {
-                                Console.WriteLine($"{v.name} = {v.value.value}");
-                                ret.Add(v.value);
-                                return ret;
+                                ret.Add(v);
+                                //return ret;
                             }
                         } else
                         {
+                            foreach (Variable a in arguments)
+                            {
+                                if (a.name == testValue.value)
+                                {
+                                    ret.Add(a);
+                                    //Console.WriteLine($"{a.value.value}");
+                                }
+                            }
+                            return ret;
                             Console.WriteLine($"Error: {Errors.SyntaxErrors.VariableOrValueNotFound} {testValue.value}");
                         }
                     }
                 } else
                 {
-                    ret.Add(testValue);
+                    Variable v = new Variable();
+                    v.name = $"v{r.Next(0, 1000)}";
+                    v.value = testValue;
+                    ret.Add(v);
                     return ret;
                 }
 
@@ -228,7 +242,10 @@ namespace tiacl
 
             for (int i = 0; i == argsStringArray.Length; i++)
             {
-                ret.Add(new Value(argsStringArray[i]));
+                Variable v = new Variable();
+                v.value = new Value(argsStringArray[i]);
+                v.name = $"v{r.Next(0, 10000)}";
+                ret.Add(v);
             }
 
             return ret;
@@ -258,12 +275,12 @@ namespace tiacl
                 String[] split = content.Split('(');
                 String fname = split[0].Split('!')[1];
                 String argsString = split[1].Split(')')[0];
-                List<Value> args = functionArguments(argsString);
+                List<Variable> args = functionArguments(argsString);
 
-                foreach (Value v in args)
+                /*foreach (Value v in args)
                 {   
                     Console.WriteLine($"builtin function call value: {v.value}");
-                }
+                }*/
                 
                 return new FunctionCall(true, fname, args);
             }
@@ -273,7 +290,7 @@ namespace tiacl
             {
                 String[] split = content.Split('(');
                 String fname = split[0];
-                List<Value> args = new List<Value>();
+                List<Variable> args = new List<Variable>();
                 String argsString = split[1].Split(')')[0];
 
                 /*if (argsString.Contains(", ") == false)
@@ -306,11 +323,6 @@ namespace tiacl
                 String[] argsStringArray = argsString.Split(", ");
                 argsStringArray.Append("");*/
                 args = functionArguments(argsString);
-                if (args.Count() != 0)
-                {
-                    Console.WriteLine($"{args[0].value}");
-                }
-
                 /*for (int i = 0; i <= argsStringArray.Length; i++)
                 {
                     args.Add(new Value(argsStringArray[i]));

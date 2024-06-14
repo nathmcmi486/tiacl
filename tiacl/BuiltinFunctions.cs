@@ -18,14 +18,13 @@ namespace tiacl
             Console.WriteLine($"{stuff}");
         }
 
-        public void execute(String name, List<Contents.Value> arguments)
+        public void execute(String name, List<Contents.Variable> arguments)
         {
             switch (name)
             {
                 case "display":
                     //Console.WriteLine($"argument {arguments[0].type}");
-                    Console.WriteLine("here");
-                    display(arguments[0].value);
+                    display(arguments[0].value.value);
                     break;
                 default:
                     break;
