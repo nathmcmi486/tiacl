@@ -92,6 +92,13 @@ namespace tiacl
                     testInt = Convert.ToInt32(content);
                 } catch (FormatException fe)
                 {
+                    if (content == "true" || content == "false" && content.Contains("\"") == false)
+                    {
+                        type = BuiltinType.Bool;
+                        value = content;
+                        return;
+                    }
+
                     type = BuiltinType.String;
                     value = content;
                     return;
@@ -99,6 +106,52 @@ namespace tiacl
 
                 type = BuiltinType.Int;
                 value = content;
+            }
+
+            public Value makeBooleanFromStatement(Value r, Value l, String symbol)
+            {
+                Value v = new Value();
+                if (r.type != l.type)
+                {
+                    v.type = BuiltinType.Unknown;
+                    Console.WriteLine($"Can't compare: {r.type} with {l.type}");
+                    return v;
+                }
+
+                v.type = BuiltinType.Bool;
+                switch (symbol)
+                {
+                    case "==":
+                        v.value = $"{r.value == l.value}";
+                        break;
+                    case "!=":
+                        v.value = $"{r.value != l.value}";
+                        break;
+                    case ">":
+                        if (r.type == BuiltinType.Int)
+                        {
+                            v.value = $"{Convert.ToInt32(r.value) > Convert.ToInt32(l.value)}";
+                        } else if (r.type == BuiltinType.String || r.type == BuiltinType.Bool)
+                        {
+                            v.value = $"{r.value.Count() > l.value.Count()}";
+                        }
+                        break;
+                    case "<":
+                        if (r.type == BuiltinType.Int)
+                        {
+                            v.value = $"{Convert.ToInt32(r.value) < Convert.ToInt32(l.value)}";
+                        }
+                        else if (r.type == BuiltinType.String || r.type == BuiltinType.Bool)
+                        {
+                            v.value = $"{r.value.Count() < l.value.Count()}";
+                        }
+                        break;
+                    default:
+                        Console.WriteLine($"Unknown symbol: {symbol}");
+                        break;
+                }
+
+                return v;
             }
         }
 
@@ -154,7 +207,14 @@ namespace tiacl
                 } else
                 {
                     split[3] = split[3].Replace(";", "");
-                    val.type = BuiltinType.Int;
+                    if (split[3] == "true" || split[3] == "false")
+                    {
+                        val.type = BuiltinType.Bool;
+                    }
+                    else
+                    {
+                        val.type = BuiltinType.Int;
+                    }
                     val.value = split[3];
                     value = val;
                 }
@@ -167,6 +227,8 @@ namespace tiacl
         {
             Int,
             String,
+            Bool,
+            Unknown
         }
 
         // Function calling
@@ -181,6 +243,51 @@ namespace tiacl
                 builtin = builtin_;
                 name = name_;
                 args = arguments_;
+            }
+        }
+
+        public class IfElse
+        {
+            public string id;
+            public Value left;
+            public Value right;
+            public FunctionCall a;
+            public FunctionCall b;
+            public bool second = false;
+            
+            public IfElse()
+            {
+
+            }
+
+            public IfElse(String ifl, String elsel)
+            {
+                Random r = new Random();
+                id = $"l{r.Next(1000, 10000)}";
+
+                if (ifl == "" || ifl == null)
+                {
+                    String[] splitIf = ifl.Split(' ');
+                    String condition = "";
+                    for (int i = 1; i < splitIf.Length; i++)
+                    {
+                        if (i == 1)
+                        {
+                            condition = splitIf[i].Replace("(", "");
+                        }
+                        condition = $"{condition} {splitIf[i]}";
+                        if (splitIf[i].Contains(")"))
+                        {
+                            condition = condition.Replace(")", "");
+                            break;
+                        }
+                    }
+                }
+
+                if (elsel == "" || elsel == null)
+                {
+                    return;
+                }
             }
         }
 
@@ -262,6 +369,19 @@ namespace tiacl
                 }
             }
 
+            // If statement
+            Console.WriteLine(content);
+            if (content.StartsWith("if "))
+            {
+                IfElse ifelse = new IfElse(content, "");
+                return ifelse;
+            }
+            else if (content.StartsWith("else "))
+            {
+                IfElse ifelse = new IfElse("", content);
+                return ifelse;
+            }
+
             // Variable
             if (content.StartsWith("decvar"))
             {
@@ -276,11 +396,6 @@ namespace tiacl
                 String fname = split[0].Split('!')[1];
                 String argsString = split[1].Split(')')[0];
                 List<Variable> args = functionArguments(argsString);
-
-                /*foreach (Value v in args)
-                {   
-                    Console.WriteLine($"builtin function call value: {v.value}");
-                }*/
                 
                 return new FunctionCall(true, fname, args);
             }
@@ -293,35 +408,8 @@ namespace tiacl
                 List<Variable> args = new List<Variable>();
                 String argsString = split[1].Split(')')[0];
 
-                /*if (argsString.Contains(", ") == false)
-                {
-                    Value tmpVal = new Value(argsString);
-                    if (tmpVal.type == BuiltinType.String && tmpVal.value.Contains("\"") == false)
-                    {
-                        for (int i = 0; i < context.Count; i++)
-                        {
-                            if (context[i] is Variable)
-                            {
-                                Variable v = (Variable)context[i];
-                                Console.WriteLine("Adding variable argument");
-                                Console.WriteLine($"{v.name} {v.value.value}");
-                                args.Add(v.value);
-                                Console.Write($"Variable value: {args[0].value}");
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Making regular function");
-                        Console.WriteLine($"args: {argsString}");
-                        args.Add(new Value(argsString));
-                    }
-                    return new FunctionCall(false, fname, args);
-                }
-
                 String[] argsStringArray = argsString.Split(", ");
-                argsStringArray.Append("");*/
+                argsStringArray.Append("");
                 args = functionArguments(argsString);
                 /*for (int i = 0; i <= argsStringArray.Length; i++)
                 {

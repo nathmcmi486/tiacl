@@ -1,0 +1,10 @@
+﻿// Checks if every type and variable is working
+decfun main() {
+	decvar test_string = "This is test string!";
+	decvar test_int = 12139121099;
+	decvar test_bool = false;
+
+	!display(test_string)!
+	!display(test_int)!
+	!display(test_bool)!
+}

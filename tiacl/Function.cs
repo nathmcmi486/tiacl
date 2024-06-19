@@ -111,6 +111,18 @@ namespace tiacl
             foreach (String line in contents)
             {
                 object ret = c.readContent(line);
+                if (ret is Contents.IfElse)
+                {
+                    Contents.IfElse ifPart = ret as Contents.IfElse;
+                    Contents.IfElse elsePart = c.readContent(line) as Contents.IfElse;
+                    Contents.IfElse ifelse = new Contents.IfElse();
+
+                    ifelse.left = ifPart.left;
+                    ifelse.right = ifPart.right;
+                    ifelse.a = ifPart.a;
+                    ifelse.b = elsePart.b;
+                    Console.WriteLine("If else built");
+                }
                 functionContents.Add(ret);
 
                 if (ret is Variable)
@@ -150,7 +162,7 @@ namespace tiacl
                             }
                         }
                         BuiltinFunctions builtinFunctions = new BuiltinFunctions();
-                        builtinFunctions.execute(fc.name, fc.args);//-----
+                        builtinFunctions.execute(fc.name, fc.args);
                     } else
                     {
                         for (int j = 0; j < intr.code.Count; j++)
