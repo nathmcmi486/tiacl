@@ -1,0 +1,6 @@
+﻿decfun no_main() {
+	decvar invalid;
+	not_real();
+	no_semicolon();
+	!display("This file should be full of errors")!
+}

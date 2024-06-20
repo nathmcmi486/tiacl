@@ -1,6 +1,6 @@
 # TIACL
 
-A *very* simple language. See [examples](tiacl/examples/) and [documentation](docs/)
+A *very* simple language. See [examples](tiacl/examples/) and [documentation](tiacl/docs/)
 
 Build (Windows):
 ```command line

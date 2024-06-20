@@ -121,7 +121,6 @@ namespace tiacl
                     ifelse.right = ifPart.right;
                     ifelse.a = ifPart.a;
                     ifelse.b = elsePart.b;
-                    Console.WriteLine("If else built");
                 }
                 functionContents.Add(ret);
 

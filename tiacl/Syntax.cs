@@ -40,7 +40,6 @@ namespace tiacl
             {
                 if (currentLineContent.StartsWith("\t//") || currentLineContent.StartsWith("//"))
                 {
-                    Console.WriteLine("comment");
                     lineNumber++;
                     currentLineContent = fileReader.ReadLine();
                     continue;
@@ -85,7 +84,6 @@ namespace tiacl
                     readingFunction = true;
                 } else if (vardecRet == Errors.SyntaxErrors.None)
                 {
-                    Console.WriteLine("yep");
                     //globalVariables.Add(temporaryVariable.buildFromContents());
                 }
                 else

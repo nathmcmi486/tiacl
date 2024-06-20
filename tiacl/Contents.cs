@@ -370,7 +370,6 @@ namespace tiacl
             }
 
             // If statement
-            Console.WriteLine(content);
             if (content.StartsWith("if "))
             {
                 IfElse ifelse = new IfElse(content, "");
